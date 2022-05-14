@@ -1,4 +1,5 @@
 const express = require('express');
+const req = require('express/lib/request');
 const { send } = require('express/lib/response');
 const { v4: uuidV4 } = require('uuid') 
 
@@ -38,9 +39,6 @@ function getBalance(statement) {
     return balance;
 }
 
-app.get('/account', (request, response) => {
-    response.send(customers)
-})
 
 app.get('/statement', verifyIfExistAccountCPF,(request, response) => {
 
@@ -135,6 +133,28 @@ app.put('/account', (request, response) => {
     customer.name = name;
 
     return response.status(200).send();
+});
+
+app.get('/account', verifyIfExistAccountCPF,(request,response) => {
+    const { customer } = request;
+    return response.json(customer);
+});
+
+app.delete('/account/', verifyIfExistAccountCPF, (request, response) => {
+    const { customer } = request;
+
+    customers.splice(customer, 1);
+
+    return response.status(200).json(customers);
+
+});
+
+app.get('/balance', verifyIfExistAccountCPF,(request, response) => {
+    const { customer } = request;
+
+    const balance = getBalance(customer.statement);
+
+    return response.json(balance);
 });
 
 app.listen(3000, () => {
